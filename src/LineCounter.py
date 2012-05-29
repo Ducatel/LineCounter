@@ -135,12 +135,5 @@ class LineCounter(object):
         result["commentLine"] = commentLine
         result["lineCode"] = lineCode
         return  result     
-        
-        
-                                                             
-if __name__ == '__main__':    
-    line=LineCounter("J:/Sources/TraceElecWorks",False)
-    line.compute()
-    raw_input("Appuyer sur une touche pour quitter le programme")
 
 
