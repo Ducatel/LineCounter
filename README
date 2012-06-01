@@ -2,5 +2,7 @@ LineCounter is a small software for count :
 	--> Blank line
 	--> Comment line
 	--> Source line
-
+	
 Interface based on Python bindings for the Qt cross-platform application and UI framework.
+
+In current version, it work with C/C++, java, or PHP files.

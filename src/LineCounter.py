@@ -24,7 +24,6 @@ class LineCounter(object):
         @param extensionList: (List) Liste des extensions de fichier a traiter
         @param ihm: (Ihm) objet de l'IHM
         '''
-        
         self._directory=directoryPath
         self._nbLineCode=0
         self._nbBlankLine=0
@@ -42,7 +41,7 @@ class LineCounter(object):
         self.ihm.affichage.setText("-".center(50,"-"))
         self.ihm.affichage.append("COMPUTE".center(50,"-"))
         self.ihm.affichage.append("-".center(50,"-"))
-        fileList=self.getAllCppFile(self._directory)
+        fileList=self.getAllFilesFiltered(self._directory)
         if len(fileList) >0:
             self.ihm.progressBar.setMaximum(len(fileList))
         counter=1
@@ -74,7 +73,7 @@ class LineCounter(object):
         self.ihm.affichage.append(strAff)
 
             
-    def getAllCppFile(self,path):
+    def getAllFilesFiltered(self,path):
         '''
         Methode recursive permettant de recuperer tous les fichiers a analyser
         @param path: chemin vers le dossier a analyser
@@ -84,7 +83,7 @@ class LineCounter(object):
         l = glob.glob(path+os.sep+'*') 
         for i in l: 
             if os.path.isdir(i): 
-                fichier.extend(self.getAllCppFile(i)) 
+                fichier.extend(self.getAllFilesFiltered(i)) 
             else:
                 extension=os.path.splitext(i)[1]
                 if extension in  self._extensionList:
@@ -123,9 +122,8 @@ class LineCounter(object):
                                         elif data[0]=="/" and data[1]=="*":
                                                 commentLine=commentLine+1
                                                 inCommentGroup=True
-                                                if data[len(data)-1]=="/" and data[len(data)-2]=="*":
+                                                if data[len(data)-2:]=="*/":
                                                     inCommentGroup=False
-                                                
                                         else:
                                             lineCode=lineCode+1
                                 else:

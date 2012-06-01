@@ -13,15 +13,23 @@ from PyQt4 import QtGui
 from PyQt4 import QtCore
 import LineCounter
 
+
 class Ihm(QtGui.QWidget):
+    '''
+    Class permettant de gerer l'interface utilisateur
+    '''
     def __init__(self):
         super(Ihm, self).__init__()
         self.extensionFilterList=[['.h','.cpp'],['.h','.c'],['.h','.cpp','.c'],['.java'],['.php']]
         self.dirPath=QtCore.QDir('')
+        self.buildUI()
         self.initUI()
-
+        self.show()
     
-    def initUI(self):
+    def buildUI(self):
+        '''
+        Methode qui va construire l'interface utilisateur
+        '''
         layoutPrinc = QtGui.QGridLayout()
 
         layoutPrinc.addWidget(QtGui.QLabel('Dossier racine du projet: '),0,0,1,2)
@@ -42,18 +50,14 @@ class Ihm(QtGui.QWidget):
 
         layoutPrinc.addWidget(QtGui.QLabel('Filtre de fichier: '),8,0)
         self.fileFilter=QtGui.QComboBox(self)
-        for filterType in self.extensionFilterList:
-            textFileFilter=''
-            for extension in filterType:
-                textFileFilter+=extension+' '
-            self.fileFilter.addItem(textFileFilter)
+            
         layoutPrinc.addWidget(self.fileFilter,8,1,1,3)
 
         self.chooseFileButton = QtGui.QPushButton('Dossier', self)
         self.chooseFileButton.clicked.connect(self.chooseFileAction)
         layoutPrinc.addWidget(self.chooseFileButton,9,0,1,2)
         
-        self.goButton = QtGui.QPushButton('Count', self)
+        self.goButton = QtGui.QPushButton('Compter', self)
         self.goButton.setDisabled(True)
         self.goButton.clicked.connect(self.goButtonAction)
         layoutPrinc.addWidget(self.goButton,9,2,1,2)   
@@ -65,9 +69,25 @@ class Ihm(QtGui.QWidget):
         self.move(qr.topLeft())
         self.setWindowIcon(QtGui.QIcon('../ressources/icon.png'))
         self.setWindowTitle('Line Counter')    
-        self.show()
+        
+        
+    def initUI(self):
+        '''
+        Methode qui va initialiser l'interface utilisateur
+        '''
+        for filterType in self.extensionFilterList:
+            textFileFilter=''
+            for extension in filterType:
+                textFileFilter+=extension+', '
+            textFileFilter=textFileFilter[:len(textFileFilter)-2]
+            self.fileFilter.addItem(textFileFilter)
+        
+        
         
     def chooseFileAction(self):
+        '''
+        Methode de gestion du choix du dossier a analyser
+        '''
         fileName = QtGui.QFileDialog.getExistingDirectory(self, "Choisir un fichier")
         if fileName:
             self.goButton.setDisabled(False)
@@ -77,17 +97,20 @@ class Ihm(QtGui.QWidget):
             self.affichage.clear()
 
     def goButtonAction(self):
+        '''
+        Methode de gestion du clique sur le bouton compter
+        '''
         printAllFile=False
         if self.printAllFile.checkState() == QtCore.Qt.Checked:
             printAllFile=True
             
-        
-        line=LineCounter.LineCounter(str(self.dirPath.path().toUtf8())
+        lineCounter=LineCounter.LineCounter(str(self.dirPath.path().toUtf8())
                                      ,printAllFile,self
                                      ,self.extensionFilterList[self.fileFilter.currentIndex()])
-        line.compute()
+        lineCounter.compute()
     
 if __name__ == '__main__':
     app = QtGui.QApplication(sys.argv)
     ihm = Ihm()
     sys.exit(app.exec_())
+
