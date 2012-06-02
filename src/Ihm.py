@@ -126,7 +126,14 @@ class Ihm(QtGui.QWidget):
         self.connect(lineCounter, QtCore.SIGNAL("maxProgress(PyQt_PyObject)"), self.fixProgressMax)
         self.connect(lineCounter, QtCore.SIGNAL("fileInfo(PyQt_PyObject)"), self.updateUI)
         self.connect(lineCounter, QtCore.SIGNAL("endOfCompute(PyQt_PyObject)"), self.endOfCompute)
-        lineCounter.run()
+        lineCounter.start()
+        self.goButton.setDisabled(True)
+        self.chooseFileButton.setDisabled(True)
+        self.affichage.append("-".center(50, "-"))
+        self.affichage.append("GET ALL FILTERED FILES".center(50, "-"))
+        self.affichage.append("-".center(50, "-"))
+        self.affichage.append("\n\n")
+        
     
     def fixProgressMax(self, value):
         '''
@@ -135,7 +142,7 @@ class Ihm(QtGui.QWidget):
         @param value Valeur du maximum de la progress
         '''
         self.progressBar.setMaximum(value)
-        self.affichage.setText("-".center(50, "-"))
+        self.affichage.append("-".center(50, "-"))
         self.affichage.append("COMPUTE".center(50, "-"))
         self.affichage.append("-".center(50, "-"))
         
@@ -169,6 +176,8 @@ class Ihm(QtGui.QWidget):
             strAff += elt + ' '
         strAff += "]\n"
         self.affichage.append(strAff)
+        self.goButton.setDisabled(False)
+        self.chooseFileButton.setDisabled(False)
            
         
         
