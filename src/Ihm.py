@@ -1,7 +1,5 @@
 #!/usr/bin/python
 # -*-coding:utf-8 -*-
-#!/usr/bin/python
-# -*-coding:utf-8 -*-
 '''
 Created on 16 mai 2012
 
@@ -20,7 +18,12 @@ class Ihm(QtGui.QWidget):
     '''
     def __init__(self):
         super(Ihm, self).__init__()
-        self.extensionFilterList=[['.h','.cpp'],['.h','.c'],['.h','.cpp','.c'],['.java'],['.php']]
+        self.extensionFilterList={"C++":['.h','.cpp'],"C":['.h','.c']
+                                  ,"Java":['.java'],"PHP":['.php']
+                                  ,"CSS":['.css'],"(x)HTML":['.html']
+                                  ,"Python":['.py'],"SQL":['.sql']
+                                  ,"Javascript":['.js']}
+        self.extensionFilterList
         self.dirPath=QtCore.QDir('')
         self.buildUI()
         self.initUI()
@@ -48,7 +51,7 @@ class Ihm(QtGui.QWidget):
         self.printAllFile = QtGui.QCheckBox('Afficher le detail pour chaque fichier', self)
         layoutPrinc.addWidget(self.printAllFile,7,0,1,4)
 
-        layoutPrinc.addWidget(QtGui.QLabel('Filtre de fichier: '),8,0)
+        layoutPrinc.addWidget(QtGui.QLabel('Langage cible: '),8,0)
         self.fileFilter=QtGui.QComboBox(self)
             
         layoutPrinc.addWidget(self.fileFilter,8,1,1,3)
@@ -75,13 +78,14 @@ class Ihm(QtGui.QWidget):
         '''
         Methode qui va initialiser l'interface utilisateur
         '''
-        for filterType in self.extensionFilterList:
-            textFileFilter=''
+        
+        for key,filterType in self.extensionFilterList.items():
+            textFileFilter='Langage '+key+' ['
             for extension in filterType:
                 textFileFilter+=extension+', '
             textFileFilter=textFileFilter[:len(textFileFilter)-2]
+            textFileFilter+=']'
             self.fileFilter.addItem(textFileFilter)
-        
         
         
     def chooseFileAction(self):
@@ -103,14 +107,17 @@ class Ihm(QtGui.QWidget):
         printAllFile=False
         if self.printAllFile.checkState() == QtCore.Qt.Checked:
             printAllFile=True
-            
+        langTab=str(self.fileFilter.currentText().toUtf8()).split('[')[0].split(' ')
         lineCounter=LineCounter.LineCounter(str(self.dirPath.path().toUtf8())
                                      ,printAllFile,self
-                                     ,self.extensionFilterList[self.fileFilter.currentIndex()])
+                                     ,langTab[1].strip())
         lineCounter.compute()
     
 if __name__ == '__main__':
+    test="<!-- dfg"
+    print(test[0])
     app = QtGui.QApplication(sys.argv)
     ihm = Ihm()
     sys.exit(app.exec_())
+    
 

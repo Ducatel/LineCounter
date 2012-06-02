@@ -8,20 +8,21 @@ Created on 16 mai 2012
 
 import glob
 import os.path
+from langProg import *
 
 class LineCounter(object):
     '''
     Classe qui permet de compter le nombre de ligne de code,
     ligne de commentaire, ligne blanche au sein d'un dossier et
-    de ces sous dossier (seulement pour le code C/C++, JAVA,PHP)
+    de ces sous dossier
     '''
 
-    def __init__(self,directoryPath,printAllFile,ihm,extensionList=[".h",".cpp"]):
+    def __init__(self,directoryPath,printAllFile,ihm,lang):
         '''
         Constructeur
         @param directoryPath: (String) Chemin vers le dossier racine de l'arborescence des fichiers a analyser
-        @param printAllFile: (Boolean) Si True, affiche le d�tail pour chaque fichier
-        @param extensionList: (List) Liste des extensions de fichier a traiter
+        @param printAllFile: (Boolean) Si True, affiche le detail pour chaque fichier
+        @param lang: langage utilise
         @param ihm: (Ihm) objet de l'IHM
         '''
         self._directory=directoryPath
@@ -30,8 +31,30 @@ class LineCounter(object):
         self._nbCommentLine=0
         self._nbFile=0
         self._printAllFile=printAllFile
-        self._extensionList=extensionList
         self.ihm=ihm
+        self.initLanguage(lang)
+        print(self.objLang)
+        
+
+    def initLanguage(self,lang):
+        if lang == "Java":
+            self.objLang=Java.Java()
+        elif lang =="C":
+            self.objLang=C.C()
+        elif lang =="C++":
+            self.objLang=Cpp.Cpp()
+        elif lang =="PHP":
+            self.objLang=Php.Php()
+        elif lang =="Javascript":
+            self.objLang=Javascript.Javascript()
+        elif lang =="CSS":
+            self.objLang=Css.Css()
+        elif lang =="(x)HTML":
+            self.objLang=Html.Html()
+        elif lang =="Python":
+            self.objLang=Python.Python()
+        elif lang =="SQL":
+            self.objLang=Sql.Sql()
        
     def compute(self):
         '''
@@ -47,7 +70,8 @@ class LineCounter(object):
         counter=1
         for elt in fileList:
                 self._nbFile= self._nbFile+1
-                result=self.countLineInFile(elt)
+                #result=self.countLineInFile(elt)
+                result=self.objLang.countLineInFile(elt)
                 self._nbLineCode=self._nbLineCode+result["lineCode"]
                 self._nbBlankLine=self._nbBlankLine+result["blankLine"]
                 self._nbCommentLine=self._nbCommentLine+result["commentLine"]
@@ -66,7 +90,7 @@ class LineCounter(object):
               .format(self._nbLineCode,self._nbCommentLine,self._nbBlankLine,self._nbFile,(self._nbLineCode+self._nbCommentLine+self._nbBlankLine)))
         strAff="File Filter: [ "
 
-        for elt in  self._extensionList:
+        for elt in  self.objLang.getExtension():
             strAff+=elt+' '
         strAff+="]\n"
 
@@ -86,52 +110,6 @@ class LineCounter(object):
                 fichier.extend(self.getAllFilesFiltered(i)) 
             else:
                 extension=os.path.splitext(i)[1]
-                if extension in  self._extensionList:
+                if extension in  self.objLang.getExtension():
                         fichier.append(i) 
         return fichier
-    
-
-    def countLineInFile(self,pathFile):
-        '''
-        Methode permettant de calculer le nombre de lignes de chaque type au sein d'un fichier
-        @param pathFile: Chemin vers le fichier a analyser
-        @return Un dictionnaire contenant le nombre de lignes de chaque type pour le fichier analys�
-        '''
-        blankLine=0
-        commentLine=0
-        lineCode=0
-        with open(pathFile, "r") as fichier:
-                inCommentGroup=False
-                while 1:
-                        data=fichier.readline()
-                        if not data:
-                                break
-                        
-                        data=data.strip()
-                        if data=="" :
-                            blankLine=blankLine+1
-                        elif inCommentGroup==True:
-                                if len(data)>1:
-                                        if data[0]=="*" and data[1]=="/":
-                                                inCommentGroup=False
-                                commentLine=commentLine+1
-                        else:
-                                if len(data)>1:
-                                        if data[0]=="/" and data[1]=="/":
-                                                commentLine=commentLine+1
-                                        elif data[0]=="/" and data[1]=="*":
-                                                commentLine=commentLine+1
-                                                inCommentGroup=True
-                                                if data[len(data)-2:]=="*/":
-                                                    inCommentGroup=False
-                                        else:
-                                            lineCode=lineCode+1
-                                else:
-                                    lineCode=lineCode+1  
-        result = {}
-        result["blankLine"] = blankLine
-        result["commentLine"] = commentLine
-        result["lineCode"] = lineCode
-        return  result     
-
-

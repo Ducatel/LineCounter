@@ -1,5 +1,14 @@
-#Fri Jun 01 18:57:32 CEST 2012
+#Sat Jun 02 16:04:21 CEST 2012
 eclipse.preferences.version=1
 encoding//src/Ihm.py=utf-8
 encoding//src/LineCounter.py=utf-8
+encoding//src/langProg/C.py=utf-8
+encoding//src/langProg/Cpp.py=utf-8
+encoding//src/langProg/Css.py=utf-8
+encoding//src/langProg/Html.py=utf-8
+encoding//src/langProg/Java.py=utf-8
+encoding//src/langProg/Javascript.py=utf-8
+encoding//src/langProg/Php.py=utf-8
+encoding//src/langProg/Python.py=utf-8
+encoding//src/langProg/Sql.py=utf-8
 encoding/<project>=UTF-8
