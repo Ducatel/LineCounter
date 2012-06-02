@@ -22,29 +22,27 @@ Created on 16 mai 2012
 import glob
 import os.path
 from langProg import *
+from PyQt4 import QtCore
 
-class LineCounter(object):
+class LineCounter(QtCore.QThread):
     '''
     Classe qui permet de compter le nombre de ligne de code,
     ligne de commentaire, ligne blanche au sein d'un dossier et
     de ces sous dossier
     '''
 
-    def __init__(self, directoryPath, printAllFile, ihm, lang):
+    def __init__(self, directoryPath, lang,ihm=None):
         '''
         Constructeur
         @param directoryPath: (String) Chemin vers le dossier racine de l'arborescence des fichiers a analyser
-        @param printAllFile: (Boolean) Si True, affiche le detail pour chaque fichier
         @param lang: langage utilise
         @param ihm: (Ihm) objet de l'IHM
         '''
+        super(LineCounter, self).__init__(ihm)
         self._directory = directoryPath
         self._nbLineCode = 0
         self._nbBlankLine = 0
         self._nbCommentLine = 0
-        self._nbFile = 0
-        self._printAllFile = printAllFile
-        self.ihm = ihm
         self.initLanguage(lang)
 
     def initLanguage(self, lang):
@@ -70,45 +68,26 @@ class LineCounter(object):
             self.objLang = Python.Python()
         elif lang == "SQL":
             self.objLang = Sql.Sql()
-       
-    def compute(self):
+                   
+    def run(self):
         '''
         Methode permettant de lancer l'analyse
-        (Affiche le/les resultat)
+        @emit fileInfo
+        @emit maxProgress
+        @emit endOfCompute
         '''
-        self.ihm.affichage.setText("-".center(50, "-"))
-        self.ihm.affichage.append("COMPUTE".center(50, "-"))
-        self.ihm.affichage.append("-".center(50, "-"))
         fileList = self.getAllFilesFiltered(self._directory)
         if len(fileList) > 0:
-            self.ihm.progressBar.setMaximum(len(fileList))
-        counter = 1
+            self.emit(QtCore.SIGNAL("maxProgress(PyQt_PyObject)"), len(fileList))
+            
         for elt in fileList:
-                self._nbFile = self._nbFile + 1
                 result = self.objLang.countLineInFile(elt)
                 self._nbLineCode = self._nbLineCode + result["lineCode"]
                 self._nbBlankLine = self._nbBlankLine + result["blankLine"]
                 self._nbCommentLine = self._nbCommentLine + result["commentLine"]
-                self.ihm.progressBar.setValue(counter)
-                counter += 1
-                if self._printAllFile:
-                    self.ihm.affichage.append("File: {0} \nLine code: {1} \nComment line: {2} \nBlank line: {3}\n\n"
-                          .format(elt, result["lineCode"], result["commentLine"], result["blankLine"]))
-
-        if self._printAllFile:
-            self.ihm.affichage.append("-".center(50, "-"))
-            self.ihm.affichage.append("TOTAL".center(50, "-"))
-            self.ihm.affichage.append("-".center(50, "-"))
-
-        self.ihm.affichage.append("Line code: {0} \nComment line: {1} \nBlank line: {2}\nFile: {3} \nTotal line: {4}\n"
-              .format(self._nbLineCode, self._nbCommentLine, self._nbBlankLine, self._nbFile, (self._nbLineCode + self._nbCommentLine + self._nbBlankLine)))
-        strAff = "File Filter: [ "
-
-        for elt in  self.objLang.getExtension():
-            strAff += elt + ' '
-        strAff += "]\n"
-
-        self.ihm.affichage.append(strAff)
+                self.emit(QtCore.SIGNAL("fileInfo(PyQt_PyObject)"), [elt,result["lineCode"], result["blankLine"], result["commentLine"]])
+        self.emit(QtCore.SIGNAL("endOfCompute(PyQt_PyObject)"), [self._nbLineCode, self._nbCommentLine, self._nbBlankLine,self.objLang.getExtension()])
+        
 
             
     def getAllFilesFiltered(self, path):

@@ -19,7 +19,6 @@ Created on 16 mai 2012
 @author: Davis Ducatel
 
 '''
-#TODO Lancer le traitement dans un trhead
 #TODO Ajouter le compteur de ligne pour python
 #TODO Ajouter un fenetre avec les info du dev
 import sys
@@ -120,18 +119,60 @@ class Ihm(QtGui.QWidget):
         '''
         Methode de gestion du clique sur le bouton compter
         '''
-        printAllFile = False
-        if self.printAllFile.checkState() == QtCore.Qt.Checked:
-            printAllFile = True
         langTab = str(self.fileFilter.currentText().toUtf8()).split('[')[0].split(' ')
         lineCounter = LineCounter.LineCounter(str(self.dirPath.path().toUtf8())
-                                     , printAllFile, self
-                                     , langTab[1].strip())
-        lineCounter.compute()
+                                     , langTab[1].strip()
+                                     , self)
+        self.connect(lineCounter, QtCore.SIGNAL("maxProgress(PyQt_PyObject)"), self.fixProgressMax)
+        self.connect(lineCounter, QtCore.SIGNAL("fileInfo(PyQt_PyObject)"), self.updateUI)
+        self.connect(lineCounter, QtCore.SIGNAL("endOfCompute(PyQt_PyObject)"), self.endOfCompute)
+        lineCounter.run()
     
+    def fixProgressMax(self, value):
+        '''
+        Methode appelé par un signal
+        Met a jour la valeur max de la progress
+        @param value Valeur du maximum de la progress
+        '''
+        self.progressBar.setMaximum(value)
+        self.affichage.setText("-".center(50, "-"))
+        self.affichage.append("COMPUTE".center(50, "-"))
+        self.affichage.append("-".center(50, "-"))
+        
+    def updateUI(self, info):
+        '''
+        Methode appelé par un signal
+        Met a jour l'interface a chaque fichier traiter
+        @param info informations sur le fichier qui vient d'etre traite
+        '''
+        self.progressBar.setValue(self.progressBar.value() + 1) 
+        if self.printAllFile.checkState() == QtCore.Qt.Checked:
+            processFile, lineCode, blanckLine, commentLine = info
+            self.affichage.append("File: {0} \nLine code: {1} \nComment line: {2} \nBlank line: {3}\nSum: {4}\n\n"
+                                  .format(processFile, lineCode, commentLine, blanckLine, (lineCode + commentLine + blanckLine)))
+
+        
+    def endOfCompute(self, info):
+        '''
+        Methode appele par un signal a la fin du traitement
+        Ajout dans l'interface le total du calcul
+        '''
+        nbLineCode, nbCommentLine, nbBlankLine, extensionList = info
+        self.affichage.append("-".center(50, "-"))
+        self.affichage.append("TOTAL".center(50, "-"))
+        self.affichage.append("-".center(50, "-"))
+        self.affichage.append("Line code: {0} \nComment line: {1} \nBlank line: {2}\nFile: {3} \nTotal line: {4}\n"
+              .format(nbLineCode, nbCommentLine, nbBlankLine, self.progressBar.maximum(), (nbLineCode + nbCommentLine + nbBlankLine)))
+        
+        strAff = "File Filter: [ "
+        for elt in  extensionList:
+            strAff += elt + ' '
+        strAff += "]\n"
+        self.affichage.append(strAff)
+           
+        
+        
 if __name__ == '__main__':
-    test = "<!-- dfg"
-    print(test[0])
     app = QtGui.QApplication(sys.argv)
     ihm = Ihm()
     sys.exit(app.exec_())
