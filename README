@@ -5,4 +5,4 @@ LineCounter is a small software for count :
 	
 Interface based on Python bindings for the Qt cross-platform application and UI framework.
 
-In current version, it work with C/C++, java, or PHP files.
+In version 1.1 , it work with C/C++, java, PHP, SQL, CSS, (x)HTML, python or Javascript files.
