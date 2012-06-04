@@ -109,7 +109,7 @@ class Ihm(QtGui.QMainWindow):
         self.move(qr.topLeft())
         self.setWindowIcon(QtGui.QIcon('../ressources/icon.png'))
         self.setWindowTitle('Line Counter')    
-        self.statusBar().showMessage('Stand by')
+        self.statusBar().showMessage('Ready')
         
         
     def initUI(self):
@@ -204,7 +204,8 @@ class Ihm(QtGui.QMainWindow):
         self.affichage.append(strAff)
         self.goButton.setDisabled(False)
         self.chooseFileButton.setDisabled(False)
-        self.statusBar().showMessage('Stand by')
+        self.statusBar().showMessage('Ready')
+        self.progressBar.setMaximum(1)
            
         
         
