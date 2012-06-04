@@ -27,7 +27,7 @@ from PyQt4 import QtCore
 import LineCounter
 
 
-class Ihm(QtGui.QWidget):
+class Ihm(QtGui.QMainWindow):
     '''
     Class permettant de gerer l'interface utilisateur
     '''
@@ -42,7 +42,27 @@ class Ihm(QtGui.QWidget):
         self.dirPath = QtCore.QDir('')
         self.buildUI()
         self.initUI()
+        self.buildMenu()
         self.show()
+        
+    def buildMenu(self):
+        '''
+        Methode de construction du menu
+        '''
+        exitAction = QtGui.QAction('&Exit', self)        
+        exitAction.setShortcut('Ctrl+Q')
+        exitAction.setStatusTip('Exit application')
+        exitAction.triggered.connect(QtGui.qApp.quit)
+        
+        aboutAction = QtGui.QAction('&About', self)        
+        aboutAction.setStatusTip('Show informations of developer ')
+
+        menubar = self.menuBar()
+        fileMenu = menubar.addMenu('&File')
+        fileMenu.addAction(exitAction)
+        aboutMenu = menubar.addMenu('&?')
+        aboutMenu.addAction(aboutAction)
+        
     
     def buildUI(self):
         '''
@@ -80,13 +100,16 @@ class Ihm(QtGui.QWidget):
         self.goButton.clicked.connect(self.goButtonAction)
         layoutPrinc.addWidget(self.goButton, 9, 2, 1, 2)   
 
-        self.setLayout(layoutPrinc)
+        centralWidget = QtGui.QWidget()
+        centralWidget.setLayout(layoutPrinc)
+        self.setCentralWidget(centralWidget)
         qr = self.frameGeometry()
         cp = QtGui.QDesktopWidget().availableGeometry().center()
         qr.moveCenter(cp)
         self.move(qr.topLeft())
         self.setWindowIcon(QtGui.QIcon('../ressources/icon.png'))
         self.setWindowTitle('Line Counter')    
+        self.statusBar().showMessage('Stand by')
         
         
     def initUI(self):
@@ -127,8 +150,11 @@ class Ihm(QtGui.QWidget):
         self.connect(lineCounter, QtCore.SIGNAL("fileInfo(PyQt_PyObject)"), self.updateUI)
         self.connect(lineCounter, QtCore.SIGNAL("endOfCompute(PyQt_PyObject)"), self.endOfCompute)
         lineCounter.start()
+        
+        self.progressBar.setMaximum(0)
         self.goButton.setDisabled(True)
         self.chooseFileButton.setDisabled(True)
+        self.statusBar().showMessage('In Processing')
         self.affichage.append("-".center(50, "-"))
         self.affichage.append("GET ALL FILTERED FILES".center(50, "-"))
         self.affichage.append("-".center(50, "-"))
@@ -178,6 +204,7 @@ class Ihm(QtGui.QWidget):
         self.affichage.append(strAff)
         self.goButton.setDisabled(False)
         self.chooseFileButton.setDisabled(False)
+        self.statusBar().showMessage('Stand by')
            
         
         
